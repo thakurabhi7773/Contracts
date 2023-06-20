@@ -16,9 +16,7 @@ contract StakingContract is Ownable {
     uint public userCount;
     IERC20 public token;
 
-    struct userInfo{
-
-        
+    struct userInfo {
         uint amount;
         uint claimed;
         uint interestRate;
