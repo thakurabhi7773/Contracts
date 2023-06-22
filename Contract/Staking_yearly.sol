@@ -24,8 +24,8 @@ contract StakingContract is Ownable {
         bool isActive;
     }
     
-     uint256 public constant MIN_STAKING_DURATION = 50;   //31536000;   // 1 year = 365 Days (365 * 24 * 60 * 60)
-     uint256 public constant MEX_STAKING_DURATION = 200;   //12614400;  // 4 year = 4 * 365 days (1460 * 24 * 60 * 60)
+     uint256 public constant MIN_STAKING_DURATION = 300;   //31536000;   // 1 year = 365 Days (365 * 24 * 60 * 60)
+     uint256 public constant MEX_STAKING_DURATION = 1200;   //12614400;  // 4 year = 4 * 365 days (1460 * 24 * 60 * 60)
      uint256[] public interestRates = [5, 10, 15, 20];  
 
      mapping(address =>mapping(uint => stakerInfo)) public stakers;
@@ -73,6 +73,10 @@ contract StakingContract is Ownable {
         uint reward = intrestAmount(msg.sender,stake_Index );
         tokenContract.transfer(msg.sender, reward);
         stakers[msg.sender][stake_Index].claimed += reward;
+         
+        if (staker.startTS >= staker.endTS){
+           staker.isActive = false;
+        }
 
     }
 
@@ -86,24 +90,21 @@ contract StakingContract is Ownable {
       
       if (elapsedTime <= staker.duration ){
          totalAmount =  ((staker.balance * staker.interestRate *staker.duration ) / (100 * MIN_STAKING_DURATION)) - staker.claimed ;
-         }
-         else {
+      }else 
+      {
          totalAmount =  ((staker.balance * staker.interestRate * elapsedTime ) / (100 * MIN_STAKING_DURATION)) - staker.claimed + staker.balance;
-         }
+      }
          return totalAmount;
     }
 
-     function getBalance (address _add , uint stake_Index) public view returns(uint){
-          stakerInfo storage staker = stakers[_add][stake_Index];
-          uint bal = staker.balance ;
-          return bal ;
+    
 
 
      }
 
 
 
-}
+
 
 
 

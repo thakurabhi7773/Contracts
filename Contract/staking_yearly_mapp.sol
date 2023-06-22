@@ -12,7 +12,8 @@ interface IERC20 {
 contract StakingContract is Ownable {
 
     uint256 public totalStakedAmount;
-    uint staker_Count;
+    uint  staker_Count;
+    uint  plan_Count;
     
     struct StakerInfo {
         uint plan_number;
@@ -29,10 +30,11 @@ contract StakingContract is Ownable {
         bool in_Process;
     }
     
-    Plan[] public plans;
+  
 
     event Claimed(address indexed from, uint256 amount);
     mapping(address => mapping( uint => StakerInfo )) public stakers;
+    mapping(uint=>Plan) public plans;
     mapping(address => uint) public User_Count;
     
     IERC20 public tokenContract;
@@ -43,16 +45,18 @@ contract StakingContract is Ownable {
  }
 // Function to add a new plan
     function addPlan(string memory _plan_Descripation , uint256 _duration, uint256 intrestPercentage) external onlyOwner {
-       plans.push(Plan({
+       plans[plan_Count]= Plan({
            plan_descripation : _plan_Descripation,
            end_Duration : _duration, 
            reward_Percentage : intrestPercentage,
-           in_Process : false }));
+           in_Process : false });
+
+           plan_Count++;
     }
 
     // Function to stake tokens and select a plan
     function Stake(uint256 amount , uint _plan_num ) external  {
-       require(_plan_num < plans.length,"invalid plan index");
+       require( plans[_plan_num].end_Duration > 0,"invalid plan index");
        require(User_Count[msg.sender] < 5 ,"you can't stake more than 5 times ");
 
        Plan storage selectedPlan = plans[_plan_num];
@@ -74,7 +78,7 @@ contract StakingContract is Ownable {
 
     // Function to claim rewards
     function unStaked(uint _plan_num) external  {
-    
+     require( plans[_plan_num].end_Duration > 0,"invalid plan index");
         StakerInfo storage staker = stakers[msg.sender][staker_Count];
         uint256 elapsedTime = block.timestamp - staker.startTS;
         Plan storage selectedPlan = plans[_plan_num];
