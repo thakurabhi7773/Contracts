@@ -41,8 +41,7 @@ contract StakingContract is Ownable {
         tokenContract = IERC20(_tokenContract);
      
  }
-
-  // Function to add a new plan
+// Function to add a new plan
     function addPlan(string memory _plan_Descripation , uint256 _duration, uint256 intrestPercentage) external onlyOwner {
        plans.push(Plan({
            plan_descripation : _plan_Descripation,
@@ -71,24 +70,22 @@ contract StakingContract is Ownable {
         });
        User_Count[msg.sender] ++;
        selectedPlan.in_Process = true;
-
-       
-    }
+ }
 
     // Function to claim rewards
     function unStaked(uint _plan_num) external  {
     
         StakerInfo storage staker = stakers[msg.sender][staker_Count];
+        uint256 elapsedTime = block.timestamp - staker.startTS;
         Plan storage selectedPlan = plans[_plan_num];
-
+         
         require(selectedPlan.in_Process == true ,"plan expired");
 
         uint reward = intrestAmount(msg.sender ,_plan_num);
         tokenContract.transfer(msg.sender, reward);
-         staker.claimed += reward;
-           uint256 elapsedTime = block.timestamp - staker.startTS;
-             if (elapsedTime >= selectedPlan.end_Duration)
-        {
+        staker.claimed += reward;
+        
+        if (elapsedTime >= selectedPlan.end_Duration){
             selectedPlan.in_Process = false;
             staker.active = false;
         }
