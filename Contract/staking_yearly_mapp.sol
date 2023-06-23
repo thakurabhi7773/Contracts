@@ -9,7 +9,8 @@ interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
 }
 
-contract StakingContract is Ownable {
+
+contract StakingContract is Ownable   {
 
     uint256 public totalStakedAmount;
     uint  staker_Count;
@@ -28,6 +29,7 @@ contract StakingContract is Ownable {
         uint256 end_Duration;
         uint256 reward_Percentage;
         bool in_Process;
+        uint stake_Count;
     }
     
   
@@ -49,7 +51,8 @@ contract StakingContract is Ownable {
            plan_descripation : _plan_Descripation,
            end_Duration : _duration, 
            reward_Percentage : intrestPercentage,
-           in_Process : false });
+           in_Process : false,
+           stake_Count: 0 });
 
            plan_Count++;
     }
@@ -57,10 +60,9 @@ contract StakingContract is Ownable {
     // Function to stake tokens and select a plan
     function Stake(uint256 amount , uint _plan_num ) external  {
        require( plans[_plan_num].end_Duration > 0,"invalid plan index");
-       require(User_Count[msg.sender] < 5 ,"you can't stake more than 5 times ");
-
+      
        Plan storage selectedPlan = plans[_plan_num];
-
+       require(selectedPlan.stake_Count < 5 , "you can't stake more than 5 times in a single plan");
        require(!selectedPlan.in_Process ," plan is in process 'please choose another plan'");
       
        tokenContract.transferFrom(msg.sender, address(this), amount);
@@ -74,6 +76,7 @@ contract StakingContract is Ownable {
         });
        User_Count[msg.sender] ++;
        selectedPlan.in_Process = true;
+       selectedPlan.stake_Count++;
  }
 
     // Function to claim rewards
@@ -120,3 +123,4 @@ contract StakingContract is Ownable {
     }
    
 }
+
